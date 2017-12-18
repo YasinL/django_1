@@ -1,6 +1,5 @@
 =====
 django_app
-
 =====
 
 django_app is a simple Django app to conduct Web-based django_app. For each
