@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>菜单详情</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        .detail-item { margin-bottom: 15px; }
+        .detail-item label { font-weight: bold; display: inline-block; width: 100px; }
+        .btn { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 4px; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        a { text-decoration: none; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 15px; color: #007bff; }
+        .status-active { color: #28a745; }
+        .status-inactive { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="{% url 'django_app:index' %}">首页</a>
+        <a href="{% url 'django_app:user_list' %}">用户管理</a>
+        <a href="{% url 'django_app:menu_list' %}">菜单管理</a>
+    </div>
+    
+    <h1>菜单详情</h1>
+    
+    <div class="detail-item">
+        <label>ID:</label>
+        <span>{{ menu.id }}</span>
+    </div>
+    <div class="detail-item">
+        <label>菜单名称:</label>
+        <span>{{ menu.name }}</span>
+    </div>
+    <div class="detail-item">
+        <label>URL:</label>
+        <span>{{ menu.url }}</span>
+    </div>
+    <div class="detail-item">
+        <label>图标:</label>
+        <span>{{ menu.icon }}</span>
+    </div>
+    <div class="detail-item">
+        <label>父菜单:</label>
+        <span>{% if menu.parent %}{{ menu.parent.name }}{% else %}无{% endif %}</span>
+    </div>
+    <div class="detail-item">
+        <label>排序:</label>
+        <span>{{ menu.order }}</span>
+    </div>
+    <div class="detail-item">
+        <label>状态:</label>
+        {% if menu.status == 1 %}
+            <span class="status-active">启用</span>
+        {% else %}
+            <span class="status-inactive">禁用</span>
+        {% endif %}
+    </div>
+    <div class="detail-item">
+        <label>创建时间:</label>
+        <span>{{ menu.created_at|date:"Y-m-d H:i:s" }}</span>
+    </div>
+    <div class="detail-item">
+        <label>更新时间:</label>
+        <span>{{ menu.updated_at|date:"Y-m-d H:i:s" }}</span>
+    </div>
+    
+    {% if menu.children.all %}
+    <h2>子菜单</h2>
+    <ul>
+        {% for child in menu.children.all %}
+        <li><a href="{% url 'django_app:menu_detail' child.id %}">{{ child.name }}</a></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    
+    <div style="margin-top: 20px;">
+        <a href="{% url 'django_app:menu_update' menu.id %}" class="btn btn-primary">编辑</a>
+        <a href="{% url 'django_app:menu_list' %}" class="btn btn-secondary">返回列表</a>
+    </div>
+</body>
+</html>

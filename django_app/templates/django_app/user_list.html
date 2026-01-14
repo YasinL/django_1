@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        .btn { padding: 8px 16px; margin: 5px; cursor: pointer; border: none; border-radius: 4px; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; }
+        tr:hover { background-color: #f5f5f5; }
+        .status-active { color: #28a745; }
+        .status-inactive { color: #dc3545; }
+        a { text-decoration: none; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 15px; color: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="{% url 'django_app:index' %}">首页</a>
+        <a href="{% url 'django_app:user_list' %}">用户管理</a>
+        <a href="{% url 'django_app:menu_list' %}">菜单管理</a>
+    </div>
+    
+    <h1>用户管理</h1>
+    <a href="{% url 'django_app:user_create' %}" class="btn btn-success">新增用户</a>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>用户名</th>
+                <th>真实姓名</th>
+                <th>邮箱</th>
+                <th>手机号</th>
+                <th>状态</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.real_name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.phone }}</td>
+                <td>
+                    {% if user.status == 1 %}
+                        <span class="status-active">启用</span>
+                    {% else %}
+                        <span class="status-inactive">禁用</span>
+                    {% endif %}
+                </td>
+                <td>{{ user.created_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                    <a href="{% url 'django_app:user_detail' user.id %}" class="btn btn-primary">查看</a>
+                    <a href="{% url 'django_app:user_update' user.id %}" class="btn btn-primary">编辑</a>
+                    <button class="btn btn-danger" onclick="deleteUser({{ user.id }})">删除</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="text-align: center;">暂无数据</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <script>
+        function deleteUser(userId) {
+            if (confirm('确定要删除该用户吗？')) {
+                fetch('{% url "django_app:user_list" %}' + userId + '/delete/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('删除成功');
+                        location.reload();
+                    } else {
+                        alert('删除失败: ' + data.message);
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if action == 'create' %}新增用户{% else %}编辑用户{% endif %}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select { width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .btn { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 4px; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        a { text-decoration: none; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 15px; color: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="{% url 'django_app:index' %}">首页</a>
+        <a href="{% url 'django_app:user_list' %}">用户管理</a>
+        <a href="{% url 'django_app:menu_list' %}">菜单管理</a>
+    </div>
+    
+    <h1>{% if action == 'create' %}新增用户{% else %}编辑用户{% endif %}</h1>
+    
+    <form id="userForm">
+        <div class="form-group">
+            <label for="username">用户名 *</label>
+            <input type="text" id="username" name="username" value="{% if user %}{{ user.username }}{% endif %}" required>
+        </div>
+        <div class="form-group">
+            <label for="real_name">真实姓名</label>
+            <input type="text" id="real_name" name="real_name" value="{% if user %}{{ user.real_name }}{% endif %}">
+        </div>
+        <div class="form-group">
+            <label for="email">邮箱</label>
+            <input type="email" id="email" name="email" value="{% if user %}{{ user.email }}{% endif %}">
+        </div>
+        <div class="form-group">
+            <label for="phone">手机号</label>
+            <input type="text" id="phone" name="phone" value="{% if user %}{{ user.phone }}{% endif %}">
+        </div>
+        <div class="form-group">
+            <label for="status">状态</label>
+            <select id="status" name="status">
+                <option value="1" {% if user and user.status == 1 %}selected{% endif %}>启用</option>
+                <option value="0" {% if user and user.status == 0 %}selected{% endif %}>禁用</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">保存</button>
+        <a href="{% url 'django_app:user_list' %}" class="btn btn-secondary">返回</a>
+    </form>
+    
+    <script>
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = {
+                username: document.getElementById('username').value,
+                real_name: document.getElementById('real_name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                status: document.getElementById('status').value
+            };
+            
+            var url = {% if action == 'create' %}'{% url "django_app:user_create" %}'{% else %}'{% url "django_app:user_update" user.id %}'{% endif %};
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(formData)
+            }).then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = '{% url "django_app:user_list" %}';
+                } else {
+                    alert('操作失败: ' + data.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if action == 'create' %}新增菜单{% else %}编辑菜单{% endif %}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select { width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .btn { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 4px; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        a { text-decoration: none; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 15px; color: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="{% url 'django_app:index' %}">首页</a>
+        <a href="{% url 'django_app:user_list' %}">用户管理</a>
+        <a href="{% url 'django_app:menu_list' %}">菜单管理</a>
+    </div>
+    
+    <h1>{% if action == 'create' %}新增菜单{% else %}编辑菜单{% endif %}</h1>
+    
+    <form id="menuForm">
+        <div class="form-group">
+            <label for="name">菜单名称 *</label>
+            <input type="text" id="name" name="name" value="{% if menu %}{{ menu.name }}{% endif %}" required>
+        </div>
+        <div class="form-group">
+            <label for="url">菜单URL</label>
+            <input type="text" id="url" name="url" value="{% if menu %}{{ menu.url }}{% endif %}">
+        </div>
+        <div class="form-group">
+            <label for="icon">图标</label>
+            <input type="text" id="icon" name="icon" value="{% if menu %}{{ menu.icon }}{% endif %}">
+        </div>
+        <div class="form-group">
+            <label for="parent_id">父菜单</label>
+            <select id="parent_id" name="parent_id">
+                <option value="">无（顶级菜单）</option>
+                {% for parent in parent_menus %}
+                <option value="{{ parent.id }}" {% if menu and menu.parent_id == parent.id %}selected{% endif %}>{{ parent.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="order">排序</label>
+            <input type="number" id="order" name="order" value="{% if menu %}{{ menu.order }}{% else %}0{% endif %}">
+        </div>
+        <div class="form-group">
+            <label for="status">状态</label>
+            <select id="status" name="status">
+                <option value="1" {% if menu and menu.status == 1 %}selected{% endif %}>启用</option>
+                <option value="0" {% if menu and menu.status == 0 %}selected{% endif %}>禁用</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">保存</button>
+        <a href="{% url 'django_app:menu_list' %}" class="btn btn-secondary">返回</a>
+    </form>
+    
+    <script>
+        document.getElementById('menuForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = {
+                name: document.getElementById('name').value,
+                url: document.getElementById('url').value,
+                icon: document.getElementById('icon').value,
+                parent_id: document.getElementById('parent_id').value || null,
+                order: document.getElementById('order').value,
+                status: document.getElementById('status').value
+            };
+            
+            var url = {% if action == 'create' %}'{% url "django_app:menu_create" %}'{% else %}'{% url "django_app:menu_update" menu.id %}'{% endif %};
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(formData)
+            }).then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = '{% url "django_app:menu_list" %}';
+                } else {
+                    alert('操作失败: ' + data.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
